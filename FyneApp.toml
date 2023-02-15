@@ -1,0 +1,6 @@
+[Details]
+  Icon = "Icon.png"
+  Name = "Fyne Setup"
+  ID = "io.fyne.setup"
+  Version = "0.0.1"
+  Build = 2
