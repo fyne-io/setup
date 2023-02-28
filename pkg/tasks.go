@@ -47,7 +47,7 @@ var tasks = []*task{
 		return "", errors.New("could not find gcc or clang compilers")
 	}},
 	{"Go bin PATH", "Verify that the PATH environment is set", func() (string, error) {
-		cmd := execabs.Command("go", "env", "GOPATH")
+		cmd := runCommand("go", "env", "GOPATH")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
@@ -69,7 +69,7 @@ var tasks = []*task{
 			return "", err
 		}
 
-		cmd := execabs.Command(path, "--version")
+		cmd := runCommand(path, "--version")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
