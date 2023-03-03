@@ -2,11 +2,13 @@
 package pkg // import "fyne.io/setup/pkg"
 
 import (
+	"net/url"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -14,10 +16,11 @@ import (
 // ShowSummaryDialog shows a new dialog in the specified window and runs the environment checks.
 // After displaying the process will start and the UI will update as it progresses.
 func ShowSummaryDialog(w fyne.Window) {
-	content := makeEnvcheckForm()
+	form := makeEnvcheckForm()
+	content := container.NewVBox(form, makeLinks())
 	d := dialog.NewCustom("Checking Development Environment", "Cancel", content, w)
 	d.Show()
-	go content.runChecks(func() {
+	go form.runChecks(func() {
 		d.SetDismissText("Done")
 	})
 }
@@ -26,13 +29,14 @@ func ShowSummaryDialog(w fyne.Window) {
 // After displaying the process will start and the UI will update as it progresses.
 func ShowSummaryWindow(a fyne.App) {
 	w := a.NewWindow("Environment Check")
-	content := makeEnvcheckForm()
+	form := makeEnvcheckForm()
+	content := container.NewVBox(form, makeLinks())
 	d := dialog.NewCustom("Checking Development Environment", "Cancel", content, w)
 	d.SetOnClosed(w.Close)
 	d.Show()
 	w.Resize(d.MinSize().AddWidthHeight(theme.Padding()*4, theme.Padding()*4))
 	w.Show()
-	go content.runChecks(func() {
+	go form.runChecks(func() {
 		d.SetDismissText("Done")
 	})
 }
@@ -111,4 +115,14 @@ func (l *checkLine) SetOnValidationChanged(cb func(error)) {
 func (l *checkLine) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(container.NewBorder(nil, nil, nil, l.icon,
 		l.label))
+}
+
+func makeLinks() *fyne.Container {
+	fix, _ := url.Parse("https://developer.fyne.io/faq/troubleshoot/")
+	help, _ := url.Parse("https://fyne.io/support/")
+
+	return container.NewHBox(layout.NewSpacer(),
+		widget.NewHyperlink("Troubleshoot", fix),
+		widget.NewHyperlink("Support", help),
+		layout.NewSpacer())
 }
