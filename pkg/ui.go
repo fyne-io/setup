@@ -118,7 +118,7 @@ func (l *checkLine) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func makeLinks() *fyne.Container {
-	fix, _ := url.Parse("https://developer.fyne.io/faq/troubleshoot/")
+	fix, _ := url.Parse("https://developer.fyne.io/faq/troubleshoot")
 	help, _ := url.Parse("https://fyne.io/support/")
 
 	return container.NewHBox(layout.NewSpacer(),
