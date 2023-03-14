@@ -3,6 +3,7 @@ package pkg
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/mod/semver"
@@ -47,12 +48,28 @@ var tasks = []*task{
 		return "", errors.New("could not find gcc or clang compilers")
 	}},
 	{"Go bin PATH", "Verify that the PATH environment is set", func() (string, error) {
-		cmd := runCommand("go", "env", "GOPATH")
+		home, _ := os.UserHomeDir()
+		goPath := filepath.Join(home, "go", "bin")
+
+		cmd := runCommand("go", "env", "GOBIN")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
 		}
-		goPath := strings.TrimSpace(string(ret))
+		bin := strings.TrimSpace(string(ret))
+		if bin != "" {
+			goPath = bin
+		} else {
+			cmd = runCommand("go", "env", "GOPATH")
+			ret, err = cmd.Output()
+			if err != nil {
+				return "", err
+			}
+			path := strings.TrimSpace(string(ret))
+			if path != "" {
+				goPath = filepath.Join(path, "bin")
+			}
+		}
 
 		allPath := os.Getenv("PATH")
 		if !strings.Contains(allPath, goPath) {
