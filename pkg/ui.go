@@ -62,7 +62,6 @@ func makeEnvcheckForm() *checkForm {
 }
 
 func (c *checkForm) runChecks(done func()) {
-	setupPath()
 	for _, f := range c.Items {
 		line := f.Widget.(*checkLine)
 		line.icon.SetResource(theme.ViewRefreshIcon())

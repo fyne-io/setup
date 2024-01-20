@@ -4,10 +4,11 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
+	"fyne.io/tools"
 	"golang.org/x/mod/semver"
-	"golang.org/x/sys/execabs"
 )
 
 type task struct {
@@ -17,12 +18,7 @@ type task struct {
 
 var tasks = []*task{
 	{"Go compiler", "Checking Go is installed and up to date", func() (string, error) {
-		path, err := execabs.LookPath("go")
-		if err != nil {
-			return "", err
-		}
-
-		cmd := execabs.Command(path, "version")
+		cmd := tools.CommandInShell("go", "version")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
@@ -35,12 +31,14 @@ var tasks = []*task{
 		return "go" + ver, nil
 	}},
 	{"C compiler", "Checking a C compiler is installed", func() (string, error) {
-		_, err := execabs.LookPath("gcc")
+		cmd := tools.CommandInShell("which", "gcc")
+		_, err := cmd.Output()
 		if err == nil {
 			return "gcc found", nil
 		}
 
-		_, err = execabs.LookPath("clang")
+		cmd = tools.CommandInShell("which", "clang")
+		_, err = cmd.Output()
 		if err == nil {
 			return "clang found", nil
 		}
@@ -51,7 +49,7 @@ var tasks = []*task{
 		home, _ := os.UserHomeDir()
 		goPath := filepath.Join(home, "go", "bin")
 
-		cmd := runCommand("go", "env", "GOBIN")
+		cmd := tools.CommandInShell("go", "env", "GOBIN")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
@@ -60,7 +58,7 @@ var tasks = []*task{
 		if bin != "" {
 			goPath = bin
 		} else {
-			cmd = runCommand("go", "env", "GOPATH")
+			cmd = tools.CommandInShell("go", "env", "GOPATH")
 			ret, err = cmd.Output()
 			if err != nil {
 				return "", err
@@ -71,7 +69,26 @@ var tasks = []*task{
 			}
 		}
 
-		allPath := os.Getenv("PATH")
+		if runtime.GOOS == "windows" {
+			cmd = tools.CommandInShell("set")
+		} else {
+			cmd = tools.CommandInShell("env")
+		}
+		ret, err = cmd.Output()
+		allPath := string(ret)
+		if err == nil {
+			for _, line := range strings.Split(allPath, "\n") {
+				if len(line) > 5 && line[:5] == "PATH=" {
+					allPath = line
+					break
+				}
+			}
+		} else if runtime.GOOS == "windows" {
+			cmd = tools.CommandInShell("Get-ChildItem", "Env:Path")
+			ret, _ = cmd.Output()
+			allPath = string(ret)
+		}
+
 		if !strings.Contains(allPath, goPath) {
 			return "", errors.New("PATH missing " + goPath)
 		}
@@ -81,12 +98,7 @@ var tasks = []*task{
 	//	return "", errors.New("no dependencies found")
 	//}},
 	{"Fyne helper", "Checking Fyne tool is installed for packaging", func() (string, error) {
-		path, err := execabs.LookPath("fyne")
-		if err != nil {
-			return "", err
-		}
-
-		cmd := runCommand(path, "--version")
+		cmd := tools.CommandInShell("fyne", "--version")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
