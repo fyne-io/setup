@@ -91,15 +91,24 @@ var tasks = []*task{
 		allPath := string(ret)
 		if err == nil {
 			for _, line := range strings.Split(allPath, "\n") {
-				if len(line) > 5 && line[:5] == "PATH=" {
+				line = strings.TrimSpace(line)
+				if len(line) > 5 && (line[:5] == "PATH=" || line[:5] == "Path=") {
 					allPath = line
 					break
 				}
 			}
 		} else if runtime.GOOS == "windows" {
-			cmd = tools.CommandInShell("Get-ChildItem", "Env:Path")
-			ret, _ = cmd.Output()
-			allPath = string(ret)
+			cmd = tools.CommandInShell("PowerShell", "-Command", "Get-ChildItem", "Env:Path", "|", "select", "Value", "|", "Format-List")
+			ret, err = cmd.Output()
+			if err != nil {
+				return "", err
+			}
+
+			lines := strings.Split(string(ret), "\n")
+			allPath = ""
+			for _, line := range lines {
+				allPath += strings.TrimSpace(line)
+			}
 		}
 
 		if !strings.Contains(allPath, goPath) {
