@@ -3,6 +3,7 @@ package pkg
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -69,8 +70,20 @@ var tasks = []*task{
 			}
 		}
 
+		isMsys := false
 		if runtime.GOOS == "windows" {
-			cmd = tools.CommandInShell("set")
+			cygpath, err := exec.LookPath("cygpath.exe")
+
+			if err == nil {
+				isMsys = true
+				goPath = winToUnixPath(goPath, cygpath)
+			}
+
+			if isMsys { // use the shell environment
+				cmd = exec.Command("env")
+			} else {
+				cmd = tools.CommandInShell("set")
+			}
 		} else {
 			cmd = tools.CommandInShell("env")
 		}
@@ -105,4 +118,13 @@ var tasks = []*task{
 		}
 		return strings.TrimSpace(string(ret)), nil
 	}},
+}
+
+// winToUnixPath converts a home path from windows to unix using the given cygpath path.
+func winToUnixPath(in, convert string) string {
+	unix, _ := exec.Command(convert, "-u", "~").Output()
+	win, _ := exec.Command(convert, "-w", "~").Output()
+
+	in = strings.ReplaceAll(in, strings.TrimSpace(string(win)), strings.TrimSpace(string(unix)))
+	return strings.ReplaceAll(in, "\\", "/")
 }
