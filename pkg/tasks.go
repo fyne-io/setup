@@ -32,13 +32,22 @@ var tasks = []*task{
 		return "go" + ver, nil
 	}},
 	{"C compiler", "Checking a C compiler is installed", func() (string, error) {
-		cmd := tools.CommandInShell("which", "gcc")
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = tools.CommandInShell("where", "gcc")
+		} else {
+			cmd = tools.CommandInShell("which", "gcc")
+		}
 		_, err := cmd.Output()
 		if err == nil {
 			return "gcc found", nil
 		}
 
-		cmd = tools.CommandInShell("which", "clang")
+		if runtime.GOOS == "windows" {
+			cmd = tools.CommandInShell("where", "clang")
+		} else {
+			cmd = tools.CommandInShell("which", "clang")
+		}
 		_, err = cmd.Output()
 		if err == nil {
 			return "clang found", nil
