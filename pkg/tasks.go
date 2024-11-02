@@ -140,9 +140,13 @@ var tasks = []*task{
 
 // winToUnixPath converts a home path from windows to unix using the given cygpath path.
 func winToUnixPath(in, convert string) string {
-	unix, _ := exec.Command(convert, "-u", "~").Output()
-	win, _ := exec.Command(convert, "-w", "~").Output()
+	unixHome, _ := exec.Command(convert, "-u", "~").Output()
+	winHome, _ := exec.Command(convert, "-w", "~").Output()
+	winRoot, _ := exec.Command(convert, "-w", "/").Output()
 
-	in = strings.ReplaceAll(in, strings.TrimSpace(string(win)), strings.TrimSpace(string(unix)))
-	return strings.ReplaceAll(in, "\\", "/")
+	in = strings.ReplaceAll(in, strings.TrimSpace(string(winHome)), strings.TrimSpace(string(unixHome)))
+	in = strings.ReplaceAll(in, "\\", "/")
+
+	winRootUnix := strings.ReplaceAll(string(winRoot), "\\", "/")
+	return strings.ReplaceAll(in, strings.TrimSpace(winRootUnix), "/")
 }
