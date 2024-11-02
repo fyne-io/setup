@@ -25,9 +25,9 @@ var tasks = []*task{
 			return "", err
 		}
 		ver := parseGoVersion(strings.TrimSpace(string(ret)))
-		before114 := semver.Compare("v"+ver, "v1.14.0") < 0
-		if before114 {
-			return "go" + ver, errors.New("go version is too old, must be 1.14 or newer")
+		before119 := semver.Compare("v"+ver, "v1.19.0") < 0
+		if before119 {
+			return "go" + ver, errors.New("go version is too old, must be 1.19 or newer")
 		}
 		return "go" + ver, nil
 	}},
