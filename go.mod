@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	fyne.io/fyne/v2 v2.5.2
-	fyne.io/tools v0.0.0-20241028084139-d0c3e1ac6b90
+	fyne.io/tools v0.0.0-20241106162520-e9663cca5058
 	golang.org/x/mod v0.17.0
 )
 
