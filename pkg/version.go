@@ -35,3 +35,19 @@ func parseGoVersion(out string) string {
 
 	return goVer
 }
+
+func parseFyneVersion(in string) string {
+	line := in
+
+	// only use line 1 in new fyne
+	if pos := strings.IndexRune(in, '\n'); pos > -1 {
+		line = in[:pos]
+	}
+
+	// get the version after "fyne cli version:"
+	if pos := strings.IndexRune(in, ':'); pos > -1 {
+		line = line[pos+1:]
+	}
+
+	return strings.TrimSpace(line)
+}

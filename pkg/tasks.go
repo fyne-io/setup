@@ -8,8 +8,9 @@ import (
 	"runtime"
 	"strings"
 
-	"fyne.io/tools"
 	"golang.org/x/mod/semver"
+
+	"fyne.io/tools"
 )
 
 type task struct {
@@ -129,12 +130,12 @@ var tasks = []*task{
 	//	return "", errors.New("no dependencies found")
 	//}},
 	{"Fyne helper", "Checking Fyne tool is installed for packaging", func() (string, error) {
-		cmd := tools.CommandInShell("fyne", "--version")
+		cmd := tools.CommandInShell("fyne", "version")
 		ret, err := cmd.Output()
 		if err != nil {
 			return "", err
 		}
-		return strings.TrimSpace(string(ret)), nil
+		return parseFyneVersion(string(ret)), nil
 	}},
 }
 
